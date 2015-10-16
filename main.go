@@ -1,0 +1,92 @@
+package main
+
+import "fmt"
+import "github.com/spf13/cobra"
+import "os"
+import "github.com/tj/go-debug"
+
+// import "os/exec"
+import "github.com/lucsky/cuid"
+import "runtime"
+
+var verbose bool
+
+func main() {
+	pkgCmd := &cobra.Command{
+		Use:   "pkg",
+		Short: "adds all the current folder to a zip file recursively",
+		Run:   pkg,
+	}
+	pkgCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "verbosity")
+
+	root := &cobra.Command{Use: "lambda-phage"}
+	root.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbosity")
+	root.AddCommand(pkgCmd)
+	root.Execute()
+}
+
+// packages your package up into a zip file
+func pkg(c *cobra.Command, _ []string) {
+	var err error
+	debug := debug.Debug("cmd.pkg")
+	binName := "lambda-phage-" + cuid.New()
+
+	zFile, err := newZipFile(binName + ".zip")
+
+	if err != nil {
+		zipFileFail(err)
+		return
+	}
+
+	wd, err := os.Getwd()
+	if err != nil {
+		fmt.Printf("Error opening directory, %s", wd)
+		return
+	}
+
+	root, err := os.Open(".")
+
+	if err != nil {
+		fmt.Printf("Error opening directory, %s", wd)
+		return
+	}
+
+	infoCh := make(chan string, 1000)
+	errCh := make(chan error)
+
+	go func() {
+		err := zFile.AddDirectory(root, infoCh)
+		if err != nil {
+			errCh <- err
+			return
+		}
+
+		close(infoCh)
+		close(errCh)
+	}()
+
+	for {
+		select {
+		case i := <-infoCh:
+			if i != "" {
+				fmt.Println(i)
+			}
+
+		case e := <-errCh:
+			if e != nil {
+				fmt.Println(e)
+			}
+			debug("errored")
+			return
+		}
+	}
+
+	err = zFile.Close()
+
+}
+
+func zipFileFail(err error) {
+	_, f, l, _ := runtime.Caller(1)
+	fmt.Printf("[%s:%s]error creating zip file, %s\n", f, l, err.Error())
+	return
+}
