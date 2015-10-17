@@ -7,6 +7,16 @@ import "github.com/tj/go-debug"
 import "github.com/lucsky/cuid"
 import "runtime"
 
+func init() {
+	pkgCmd := &cobra.Command{
+		Use:   "pkg",
+		Short: "adds all the current folder to a zip file recursively",
+		Run:   pkg,
+	}
+	pkgCmd.Flags().BoolP("verbose", "v", false, "verbosity")
+	cmds = append(cmds, pkgCmd)
+}
+
 // packages your package up into a zip file
 func pkg(c *cobra.Command, _ []string) {
 	var err error
