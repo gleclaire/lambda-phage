@@ -33,7 +33,12 @@ func pkg(c *cobra.Command, _ []string) {
 		return
 	}
 
-	infoCh := make(chan string, 1000)
+	var infoCh chan string
+	verbose, _ := c.Flags().GetBool("verbose")
+	if verbose {
+		infoCh = make(chan string, 1000)
+	}
+
 	errCh := make(chan error)
 
 	go func() {
@@ -43,7 +48,10 @@ func pkg(c *cobra.Command, _ []string) {
 			return
 		}
 
-		close(infoCh)
+		if infoCh != nil {
+			close(infoCh)
+		}
+
 		close(errCh)
 	}()
 
