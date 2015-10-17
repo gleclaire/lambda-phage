@@ -6,6 +6,7 @@ import "os"
 import "github.com/tj/go-debug"
 import "github.com/lucsky/cuid"
 import "runtime"
+import "strings"
 
 func init() {
 	pkgCmd := &cobra.Command{
@@ -13,7 +14,11 @@ func init() {
 		Short: "adds all the current folder to a zip file recursively",
 		Run:   pkg,
 	}
-	pkgCmd.Flags().BoolP("verbose", "v", false, "verbosity")
+	flg := pkgCmd.Flags()
+
+	flg.BoolP("verbose", "v", false, "verbosity")
+	flg.StringP("output", "o", "", "output file name")
+
 	cmds = append(cmds, pkgCmd)
 }
 
@@ -21,9 +26,27 @@ func init() {
 func pkg(c *cobra.Command, _ []string) {
 	var err error
 	debug := debug.Debug("cmd.pkg")
-	binName := "lambda-phage-" + cuid.New()
+	var binName string
 
-	zFile, err := newZipFile(binName + ".zip")
+	if cfg != nil {
+		binName = cfg.Pkg.Name
+	}
+
+	flagName, _ := c.Flags().GetString("output")
+	if flagName != "" {
+		binName = flagName
+	}
+
+	if binName == "" {
+		binName = "lambda-phage-" + cuid.New()
+	}
+
+	// add ".zip" to the filename if one is not found
+	if strings.Index(binName, ".zip") != (len(binName) - 4) {
+		binName += ".zip"
+	}
+
+	zFile, err := newZipFile(binName)
 
 	if err != nil {
 		zipFileFail(err)
