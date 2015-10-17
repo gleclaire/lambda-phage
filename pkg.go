@@ -12,7 +12,7 @@ func init() {
 	pkgCmd := &cobra.Command{
 		Use:   "pkg",
 		Short: "adds all the current folder to a zip file recursively",
-		Run:   pkg,
+		RunE:  pkg,
 	}
 	flg := pkgCmd.Flags()
 
@@ -23,47 +23,26 @@ func init() {
 }
 
 // packages your package up into a zip file
-func pkg(c *cobra.Command, _ []string) {
+func pkg(c *cobra.Command, _ []string) error {
 	var err error
 	debug := debug.Debug("cmd.pkg")
-	var binName string
 
-	if cfg != nil {
-		binName = cfg.Pkg.Name
-	}
-
-	flagName, _ := c.Flags().GetString("output")
-	if flagName != "" {
-		binName = flagName
-	}
-
-	if binName == "" {
-		binName = "lambda-phage-" + cuid.New()
-	}
-
-	// add ".zip" to the filename if one is not found
-	if strings.Index(binName, ".zip") != (len(binName) - 4) {
-		binName += ".zip"
-	}
-
+	binName := getArchiveName(c)
 	zFile, err := newZipFile(binName)
 
 	if err != nil {
-		zipFileFail(err)
-		return
+		return zipFileFail(err)
 	}
 
 	wd, err := os.Getwd()
 	if err != nil {
-		fmt.Printf("Error opening directory, %s", wd)
-		return
+		return fmt.Errorf("Error opening directory, %s", wd)
 	}
 
 	root, err := os.Open(".")
 
 	if err != nil {
-		fmt.Printf("Error opening directory, %s", wd)
-		return
+		return fmt.Errorf("Error opening directory, %s", wd)
 	}
 
 	var infoCh chan string
@@ -97,19 +76,42 @@ func pkg(c *cobra.Command, _ []string) {
 
 		case e := <-errCh:
 			if e != nil {
-				fmt.Println(e)
+				debug("errored")
+				return e
 			}
-			debug("errored")
-			return
 		}
 	}
 
-	err = zFile.Close()
-
+	return zFile.Close()
 }
 
-func zipFileFail(err error) {
+// based on whatever has been passed in, this will determine the
+// filename for the archive
+func getArchiveName(c *cobra.Command) string {
+	var binName string
+
+	if cfg != nil {
+		binName = cfg.Pkg.Name
+	}
+
+	flagName, _ := c.Flags().GetString("output")
+	if flagName != "" {
+		binName = flagName
+	}
+
+	if binName == "" {
+		binName = "lambda-phage-" + cuid.New()
+	}
+
+	// add ".zip" to the filename if one is not found
+	if strings.Index(binName, ".zip") != (len(binName) - 4) {
+		binName += ".zip"
+	}
+
+	return binName
+}
+
+func zipFileFail(err error) error {
 	_, f, l, _ := runtime.Caller(1)
-	fmt.Printf("[%s:%s]error creating zip file, %s\n", f, l, err.Error())
-	return
+	return fmt.Errorf("[%s:%s]error creating zip file, %s\n", f, l, err.Error())
 }
