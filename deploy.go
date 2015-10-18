@@ -7,6 +7,7 @@ import "github.com/aws/aws-sdk-go/aws/awserr"
 import "github.com/tj/go-debug"
 import "os"
 import "io"
+import "io/ioutil"
 import "fmt"
 import "bytes"
 
@@ -33,6 +34,7 @@ func init() {
 }
 
 func deploy(c *cobra.Command, args []string) error {
+	debug := debug.Debug("cmd.deploy")
 	// must package first, so:
 	var err error
 	err = pkg(c, args)
@@ -44,22 +46,26 @@ func deploy(c *cobra.Command, args []string) error {
 	// should have written data to this file
 	binName := getArchiveName(c)
 
-	//l := lambda.New(nil)
-
-	// var iamRole *string
-	// iamRole, err = cfg.getRoleArn()
-	// if err != nil {
-	// 	return err
-	// }
+	var iamRole *string
+	iamRole, err = cfg.getRoleArn()
+	if err != nil {
+		return err
+	}
 
 	code := &lambda.FunctionCode{}
 	// try getting s3 information
 	bucket, key := cfg.getS3Info(binName)
+
 	if bucket == nil || key == nil {
 		// if we couldn't get bucket or
 		// key info, let's upload the data
 		// ...soon
-		panic("not implemented yet, sorry!")
+		b, err := ioutil.ReadFile(binName)
+		if err != nil {
+			return err
+		}
+
+		code.ZipFile = b
 	} else {
 		code.S3Bucket = bucket
 		code.S3Key = key
@@ -69,13 +75,84 @@ func deploy(c *cobra.Command, args []string) error {
 		}
 	}
 
-	// just try creating the function now
-	// r, err := l.CreateFunction(
-	// 	&lambda.CreateFunctionInput{
-	// 		Code: &lambda.FunctionCode{},
-	// 	},
-	// )
+	debug("preparing for lambda API")
+	for _, region := range cfg.Regions {
+		debug("using lambda API for region %s", *region)
+		l := lambda.New(
+			aws.NewConfig().
+				WithRegion(*region),
+		)
+		//just try creating the function now
+		_, err := l.CreateFunction(
+			&lambda.CreateFunctionInput{
+				Code:         code,
+				FunctionName: cfg.Name,
+				Description:  cfg.Description,
+				Handler:      cfg.EntryPoint,
+				MemorySize:   cfg.MemorySize,
+				Runtime:      cfg.Runtime,
+				Timeout:      cfg.Timeout,
+				Role:         iamRole,
+				Publish:      aws.Bool(true),
+			},
+		)
 
+		if err != nil {
+			if awe, ok := err.(awserr.Error); ok {
+				if awe.Code() == "ResourceConflictException" {
+					debug("function already exists, calling update")
+					return updateLambda(l, code, iamRole)
+				} else {
+					return err
+				}
+			} else {
+				return err
+			}
+		} else {
+			// if the create function succeeded,
+			// we need to figure out the mapping
+			// info, etc
+			debug("function creation succeeded! ...we think")
+		}
+	}
+
+	return nil
+}
+
+// updates function code, settings in AWS lambda
+func updateLambda(
+	l *lambda.Lambda,
+	code *lambda.FunctionCode,
+	iamRole *string,
+) error {
+	_, err := l.UpdateFunctionConfiguration(
+		&lambda.UpdateFunctionConfigurationInput{
+			FunctionName: cfg.Name,
+			Description:  cfg.Description,
+			Handler:      cfg.EntryPoint,
+			MemorySize:   cfg.MemorySize,
+			Role:         iamRole,
+			Timeout:      cfg.Timeout,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	_, err = l.UpdateFunctionCode(
+		&lambda.UpdateFunctionCodeInput{
+			FunctionName:    cfg.Name,
+			S3Bucket:        code.S3Bucket,
+			S3Key:           code.S3Key,
+			S3ObjectVersion: code.S3ObjectVersion,
+			ZipFile:         code.ZipFile,
+			Publish:         aws.Bool(true),
+		},
+	)
+
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
