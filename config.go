@@ -25,10 +25,10 @@ type Config struct {
 	Description *string
 	Archive     *string
 	EntryPoint  *string
-	MemorySize  *uint
+	MemorySize  *int64
 	Runtime     *string
 	Timeout     *uint
-	Region      *string
+	Regions     []*string
 	IamRole     struct {
 		Arn  *string
 		Name *string
@@ -37,6 +37,7 @@ type Config struct {
 		S3Bucket        *string
 		S3Key           *string
 		S3ObjectVersion *string
+		S3Region        *string
 	}
 }
 
