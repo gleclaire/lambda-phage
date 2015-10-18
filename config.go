@@ -36,7 +36,7 @@ type Config struct {
 	EntryPoint  *string
 	MemorySize  *int64
 	Runtime     *string
-	Timeout     *uint
+	Timeout     *int64
 	Regions     []*string
 	IamRole     struct {
 		Arn  *string
