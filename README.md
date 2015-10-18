@@ -37,6 +37,8 @@ iamRole:
   arn: aws
   name: lambda_basic_execution
 location:
+  # omit S3 configuration to upload
+  # directly to Lambda
   s3bucket: test-bucket
   s3key: my-first-function/
   s3region: us-east-1
