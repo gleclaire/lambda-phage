@@ -1,7 +1,7 @@
 # lambda-phage
 a tool for deploying to aws lambda
 
-## usage
+## Usage
 
 ```
 Usage:
@@ -17,4 +17,28 @@ Flags:
   -v, --verbose[=false]: verbosity
 
 Use "lambda-phage [command] --help" for more information about a command.
+```
+## Configuration
+
+This tool stores its config in a YAML file named `l-p.yml` by default. Here's a quick sample:
+
+```yaml
+name: my-first-lambda-function
+description: provides some sample stuff
+archive: my-first-lambda-function.zip
+entryPoint: index.handler
+memorySize: 128
+runtime: nodejs
+timeout: 5
+regions: [us-east-1]
+iamRole:
+  # if present, 
+  # ARN takes precedence over name
+  arn: aws
+  name: lambda_basic_execution
+location:
+  s3bucket: test-bucket
+  s3key: my-first-function/
+  s3region: us-east-1
+  s3ObjectVersion: myversion
 ```
