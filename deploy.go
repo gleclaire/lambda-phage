@@ -3,10 +3,10 @@ package main
 import "github.com/aws/aws-sdk-go/service/lambda"
 import "github.com/aws/aws-sdk-go/service/s3"
 import "github.com/aws/aws-sdk-go/aws"
+import "github.com/aws/aws-sdk-go/aws/awserr"
 import "github.com/tj/go-debug"
 import "os"
 import "io"
-import "io/ioutil"
 import "fmt"
 import "bytes"
 
@@ -83,7 +83,7 @@ func deploy(c *cobra.Command, args []string) error {
 // but this fn will upload your file to s3
 func uploadS3(fName string, bucket, key *string) error {
 	debug := debug.Debug("uploadS3")
-	awscfg := aws.NewConfig().WithRegion(*cfg.Region)
+	awscfg := aws.NewConfig().WithRegion(*cfg.Location.S3Region)
 	s := s3.New(awscfg)
 
 	f, err := os.Open(fName)
@@ -101,16 +101,10 @@ func uploadS3(fName string, bucket, key *string) error {
 		// multipart if bigger than 5MiB
 		return uploadS3MPU(s, f, bucket, key)
 	} else {
-		// just put object
-		data, err := ioutil.ReadAll(f)
-		if err != nil {
-			return err
-		}
-
 		_, err = s.PutObject(&s3.PutObjectInput{
 			Bucket: bucket,
 			Key:    key,
-			Body:   bytes.NewReader(data),
+			Body:   f,
 		})
 		if err != nil {
 			return err
