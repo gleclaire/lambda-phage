@@ -1,10 +1,10 @@
 package main
 
-import "github.com/aws/aws-sdk-go/service/lambda"
-import "github.com/aws/aws-sdk-go/service/s3"
-import "github.com/aws/aws-sdk-go/aws"
-import "github.com/aws/aws-sdk-go/aws/awserr"
-import "github.com/tj/go-debug"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/aws/aws-sdk-go/service/lambda"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/aws/aws-sdk-go/service/s3"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/aws/aws-sdk-go/aws"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/aws/aws-sdk-go/aws/awserr"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/tj/go-debug"
 import "os"
 import "io"
 import "io/ioutil"
@@ -12,7 +12,7 @@ import "fmt"
 import "bytes"
 
 //import "github.com/aws/aws-sdk-go/aws"
-import "github.com/spf13/cobra"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/spf13/cobra"
 
 type wtflog struct{}
 

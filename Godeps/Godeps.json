@@ -1,0 +1,119 @@
+{
+	"ImportPath": "github.com/hopkinsth/lambda-phage",
+	"GoVersion": "go1.5.1",
+	"Deps": [
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/aws",
+			"Comment": "v0.9.15",
+			"Rev": "7ab6754ddaaa7972ac1c896ddd7f796cc726e79d"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/internal/endpoints",
+			"Comment": "v0.9.15",
+			"Rev": "7ab6754ddaaa7972ac1c896ddd7f796cc726e79d"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/internal/protocol/json/jsonutil",
+			"Comment": "v0.9.15",
+			"Rev": "7ab6754ddaaa7972ac1c896ddd7f796cc726e79d"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/internal/protocol/jsonrpc",
+			"Comment": "v0.9.15",
+			"Rev": "7ab6754ddaaa7972ac1c896ddd7f796cc726e79d"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/internal/protocol/query",
+			"Comment": "v0.9.15",
+			"Rev": "7ab6754ddaaa7972ac1c896ddd7f796cc726e79d"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/internal/protocol/rest",
+			"Comment": "v0.9.15",
+			"Rev": "7ab6754ddaaa7972ac1c896ddd7f796cc726e79d"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/internal/protocol/restjson",
+			"Comment": "v0.9.15",
+			"Rev": "7ab6754ddaaa7972ac1c896ddd7f796cc726e79d"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/internal/protocol/restxml",
+			"Comment": "v0.9.15",
+			"Rev": "7ab6754ddaaa7972ac1c896ddd7f796cc726e79d"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/internal/protocol/xml/xmlutil",
+			"Comment": "v0.9.15",
+			"Rev": "7ab6754ddaaa7972ac1c896ddd7f796cc726e79d"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/internal/signer/v4",
+			"Comment": "v0.9.15",
+			"Rev": "7ab6754ddaaa7972ac1c896ddd7f796cc726e79d"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/service/iam",
+			"Comment": "v0.9.15",
+			"Rev": "7ab6754ddaaa7972ac1c896ddd7f796cc726e79d"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/service/lambda",
+			"Comment": "v0.9.15",
+			"Rev": "7ab6754ddaaa7972ac1c896ddd7f796cc726e79d"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/service/s3",
+			"Comment": "v0.9.15",
+			"Rev": "7ab6754ddaaa7972ac1c896ddd7f796cc726e79d"
+		},
+		{
+			"ImportPath": "github.com/cpuguy83/go-md2man/md2man",
+			"Comment": "v1.0.4",
+			"Rev": "71acacd42f85e5e82f70a55327789582a5200a90"
+		},
+		{
+			"ImportPath": "github.com/inconshreveable/mousetrap",
+			"Rev": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+		},
+		{
+			"ImportPath": "github.com/lucsky/cuid",
+			"Comment": "v1.0.1-1-g25c102a",
+			"Rev": "25c102a50ca4eeecb7a79d32f9a26b6116213fe7"
+		},
+		{
+			"ImportPath": "github.com/peterh/liner",
+			"Rev": "b850cf8c6d0ee52309aad09ac610508c6c75e819"
+		},
+		{
+			"ImportPath": "github.com/russross/blackfriday",
+			"Comment": "v1.3",
+			"Rev": "8cec3a854e68dba10faabbe31c089abf4a3e57a6"
+		},
+		{
+			"ImportPath": "github.com/shurcooL/sanitized_anchor_name",
+			"Rev": "244f5ac324cb97e1987ef901a0081a77bfd8e845"
+		},
+		{
+			"ImportPath": "github.com/spf13/cobra",
+			"Rev": "8b2293c74173adb0e12df6862c1ea36afac2401f"
+		},
+		{
+			"ImportPath": "github.com/spf13/pflag",
+			"Rev": "08b1a584251b5b62f458943640fc8ebd4d50aaa5"
+		},
+		{
+			"ImportPath": "github.com/tj/go-debug",
+			"Comment": "v2.0.0",
+			"Rev": "ff4a55a20a86994118644bbddc6a216da193cc13"
+		},
+		{
+			"ImportPath": "github.com/vaughan0/go-ini",
+			"Rev": "a98ad7ee00ec53921f08832bc06ecf7fd600e6a1"
+		},
+		{
+			"ImportPath": "gopkg.in/yaml.v2",
+			"Rev": "53feefa2559fb8dfa8d81baad31be332c97d6c77"
+		}
+	]
+}

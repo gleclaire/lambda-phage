@@ -1,8 +1,8 @@
 package main
 
-import "gopkg.in/yaml.v2"
-import "github.com/spf13/cobra"
-import "github.com/peterh/liner"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/gopkg.in/yaml.v2"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/spf13/cobra"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/peterh/liner"
 import "strconv"
 import "strings"
 import "fmt"

@@ -1,9 +1,9 @@
 package main
 
-import "github.com/spf13/cobra"
-import "gopkg.in/yaml.v2"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/spf13/cobra"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/gopkg.in/yaml.v2"
 import "io/ioutil"
-import "github.com/tj/go-debug"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/tj/go-debug"
 import "os"
 import "fmt"
 

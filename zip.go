@@ -1,7 +1,7 @@
 package main
 
 import "os"
-import "github.com/tj/go-debug"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/tj/go-debug"
 import "archive/zip"
 import "io"
 import "bytes"

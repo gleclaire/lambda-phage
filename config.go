@@ -1,9 +1,9 @@
 package main
 
 import "fmt"
-import "github.com/aws/aws-sdk-go/service/iam"
-import "github.com/aws/aws-sdk-go/aws"
-import "github.com/tj/go-debug"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/aws/aws-sdk-go/service/iam"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/aws/aws-sdk-go/aws"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/tj/go-debug"
 import "strings"
 
 /*

@@ -1,10 +1,10 @@
 package main
 
 import "fmt"
-import "github.com/spf13/cobra"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/spf13/cobra"
 import "os"
-import "github.com/tj/go-debug"
-import "github.com/lucsky/cuid"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/tj/go-debug"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/lucsky/cuid"
 import "runtime"
 import "strings"
 
