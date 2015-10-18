@@ -133,5 +133,5 @@ func getIamPolicy(name string) (*string, error) {
 		return aws.String(""), err
 	}
 
-	return r.Role.ARN, nil
+	return r.Role.Arn, nil
 }
