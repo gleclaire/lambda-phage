@@ -28,6 +28,7 @@ type Config struct {
 	MemorySize  *uint
 	Runtime     *string
 	Timeout     *uint
+	Region      *string
 	IamRole     struct {
 		Arn  *string
 		Name *string
