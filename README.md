@@ -3,7 +3,7 @@ a tool for deploying to aws lambda
 
 ## usage
 
-```sh
+```
 Usage:
   lambda-phage [command]
 
