@@ -157,7 +157,7 @@ func uploadS3MPU(
 	debug("created multipart upload")
 
 	buf := new(bytes.Buffer)
-	bslice := make([]byte, 1024)
+	bslice := make([]byte, 8096)
 	var pNum int64 = 1
 
 	parts := make([]*s3.CompletedPart, 0)
@@ -182,7 +182,7 @@ func uploadS3MPU(
 		buf.Write(bslice)
 
 		// drain buf on 1MiB of data
-		if buf.Len() == 1024*1024 || isEOF {
+		if buf.Len() >= (1024*1024*5) || isEOF {
 			debug("have file data, uploading chunk")
 			var err error
 			if buf.Len() > 0 {
