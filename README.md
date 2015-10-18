@@ -1,6 +1,12 @@
 # lambda-phage
 a tool for deploying to aws lambda
 
+## Installation
+
+```sh
+go get github.com/hopkinsth/lambda-phage
+``
+
 ## Usage
 
 ```
