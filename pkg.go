@@ -51,12 +51,12 @@ func pkg(c *cobra.Command, _ []string) error {
 		infoCh = make(chan string, 1000)
 	}
 
-	errCh := make(chan error)
+	doneCh := make(chan error)
 
 	go func() {
 		err := zFile.AddDirectory(root, infoCh)
 		if err != nil {
-			errCh <- err
+			doneCh <- err
 			return
 		}
 
@@ -64,21 +64,22 @@ func pkg(c *cobra.Command, _ []string) error {
 			close(infoCh)
 		}
 
-		close(errCh)
+		doneCh <- nil
 	}()
 
-	for {
+	good := true
+	for good {
 		select {
 		case i := <-infoCh:
 			if i != "" {
 				fmt.Println(i)
 			}
-
-		case e := <-errCh:
+		case e := <-doneCh:
 			if e != nil {
 				debug("errored")
 				return e
 			}
+			good = false
 		}
 	}
 
@@ -91,7 +92,7 @@ func getArchiveName(c *cobra.Command) string {
 	var binName string
 
 	if cfg != nil {
-		binName = cfg.Pkg.Name
+		binName = *cfg.Name
 	}
 
 	flagName, _ := c.Flags().GetString("output")
