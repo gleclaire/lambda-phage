@@ -5,7 +5,7 @@ a tool for deploying to aws lambda
 
 ```sh
 go get github.com/hopkinsth/lambda-phage
-``
+```
 
 ## Usage
 
