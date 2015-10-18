@@ -33,15 +33,15 @@ type Config struct {
 	Name        *string
 	Description *string
 	Archive     *string
-	EntryPoint  *string
-	MemorySize  *int64
+	EntryPoint  *string `yaml:"entryPoint"`
+	MemorySize  *int64  `yaml:"memorySize"`
 	Runtime     *string
 	Timeout     *int64
-	Regions     []*string
-	IamRole     struct {
-		Arn  *string
-		Name *string
-	}
+	Regions     []*string `yaml:"regions",flow`
+	IamRole     *struct {
+		Arn  *string `yaml:"arn"`
+		Name *string `yaml:"name"`
+	} `yaml:"iamRole"`
 	Location *struct {
 		S3Bucket        *string
 		S3Key           *string
@@ -59,9 +59,9 @@ func (c *Config) getRoleArn() (*string, error) {
 
 	// if the config file has an ARN listed,
 	// that takes precedence
-	if *c.IamRole.Arn != "" {
+	if c.IamRole.Arn != nil {
 		return c.IamRole.Arn, nil
-	} else if *c.IamRole.Name != "" {
+	} else if c.IamRole.Name != nil {
 		// look up the iam role name
 		iamRole, err := getIamPolicy(*c.IamRole.Name)
 		if err != nil {
@@ -133,7 +133,10 @@ func (c *Config) getS3Info(fName string) (bucket, key *string) {
 
 // gets an IAM policy by name
 func getIamPolicy(name string) (*string, error) {
+	debug := debug.Debug("getIamPolicy")
 	i := iam.New(nil)
+
+	debug("getting iam role")
 
 	r, err := i.GetRole(&iam.GetRoleInput{
 		RoleName: &name,
