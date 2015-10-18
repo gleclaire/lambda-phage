@@ -1,0 +1,17 @@
+# lambda-phage config file sample
+
+name: my-first-lambda-function
+description: provides some sample stuff
+archive: my-first-lambda-function.zip
+entryPoint: "index.handler"
+memorySize: 128
+runtime: nodejs
+timeout: 5
+iamPolicy:
+  # arn: 
+  name: lambda_basic_execution
+location:
+  s3bucket: test-bucket
+  s3key: my-first-function/
+  #s3ObjectVersion
+
