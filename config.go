@@ -12,12 +12,21 @@ import "strings"
 
 name: my-first-lambda-function
 description: provides some sample stuff
-pkg:
-  name: my-first-lambda-function.zip
-deploy:
-  type: s3
-  s3-bucket: test-bucket
-  use-versioning: true
+archive: my-first-lambda-function.zip
+entryPoint: "index.handler"
+memorySize: 128
+runtime: nodejs
+timeout: 5
+regions:
+  - us-east-1
+iamPolicy:
+  # arn:
+  name: lambda_basic_execution
+location:
+  s3bucket: test-bucket
+  s3key: my-first-function/
+  s3region: us-east-1
+  #s3ObjectVersion
 */
 
 type Config struct {
