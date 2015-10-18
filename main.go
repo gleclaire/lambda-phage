@@ -35,7 +35,7 @@ func main() {
 
 	if cfgExists {
 		debug("reading config file %s", cf)
-		f, err := ioutil.ReadFile("l-p.yml")
+		f, err := ioutil.ReadFile(cf)
 		if err != nil {
 			fmt.Println("Error reading config file: %s", err.Error())
 			return
@@ -43,6 +43,7 @@ func main() {
 
 		debug("decoding config")
 		err = yaml.Unmarshal(f, &cfg)
+
 		if err != nil {
 			fmt.Println("Error reading config file: %s", err.Error())
 			return
