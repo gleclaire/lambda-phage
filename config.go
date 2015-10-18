@@ -29,6 +29,18 @@ location:
   #s3ObjectVersion
 */
 
+type IamRole struct {
+	Arn  *string `yaml:"arn"`
+	Name *string `yaml:"name"`
+}
+
+type Location struct {
+	S3Bucket        *string
+	S3Key           *string
+	S3ObjectVersion *string
+	S3Region        *string
+}
+
 type Config struct {
 	Name        *string
 	Description *string
@@ -38,16 +50,8 @@ type Config struct {
 	Runtime     *string
 	Timeout     *int64
 	Regions     []*string `yaml:"regions",flow`
-	IamRole     *struct {
-		Arn  *string `yaml:"arn"`
-		Name *string `yaml:"name"`
-	} `yaml:"iamRole"`
-	Location *struct {
-		S3Bucket        *string
-		S3Key           *string
-		S3ObjectVersion *string
-		S3Region        *string
-	}
+	IamRole     *IamRole  `yaml:"iamRole"`
+	Location    *Location
 }
 
 // returns the arn for the role specified
