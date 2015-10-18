@@ -10,33 +10,6 @@ import "fmt"
 var cmds = []*cobra.Command{}
 var cfg *Config
 
-/*
-
-# lambda-phage config file sample
-
-name: my-first-lambda-function
-description: provides some sample stuff
-pkg:
-  name: my-first-lambda-function.zip
-deploy:
-  type: s3
-  s3-bucket: test-bucket
-  use-versioning: true
-*/
-
-type Config struct {
-	Name        string
-	Description string
-	Pkg         struct {
-		Name string
-	}
-	Deploy struct {
-		Type          string
-		S3Bucket      string
-		UseVersioning *bool
-	}
-}
-
 func main() {
 	defaultCfgName := "l-p.yml"
 	debug := debug.Debug("main")
