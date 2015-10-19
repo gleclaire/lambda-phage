@@ -6,6 +6,8 @@ import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/aws/a
 import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/aws/aws-sdk-go/aws"
 import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/tj/go-debug"
 import "strings"
+import "io/ioutil"
+import "os"
 
 /*
 
@@ -78,6 +80,7 @@ func (c *Config) writeToFile(fName string) error {
 		return err
 	}
 
+	return nil
 }
 
 // copies properties from all the config objects into

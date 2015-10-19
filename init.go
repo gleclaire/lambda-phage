@@ -1,6 +1,5 @@
 package main
 
-import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/gopkg.in/yaml.v2"
 import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/spf13/cobra"
 import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/peterh/liner"
 import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/aws/aws-sdk-go/service/iam"
@@ -9,7 +8,6 @@ import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/tj/go
 import "strconv"
 import "strings"
 import "fmt"
-import "io/ioutil"
 import "os"
 
 func init() {
@@ -79,6 +77,7 @@ func (p *prompt) withFunc(s func(string)) *prompt {
 
 // helps you build a config file
 func initPhage(c *cobra.Command, _ []string) {
+	var err error
 	l := liner.NewLiner()
 	defer l.Close()
 	l.SetCtrlCAborts(true)
@@ -100,10 +99,10 @@ func initPhage(c *cobra.Command, _ []string) {
 		return nil
 	})
 
-	cfg := new(Config)
-	cfg.IamRole = new(IamRole)
-	cfg.Location = new(Location)
-	prompts := getPrompts(cfg)
+	iCfg := new(Config)
+	iCfg.IamRole = new(IamRole)
+	iCfg.Location = new(Location)
+	prompts := getPrompts(iCfg)
 
 	for _, cPrompt := range prompts {
 		p := cPrompt
@@ -174,15 +173,22 @@ func initPhage(c *cobra.Command, _ []string) {
 		}
 	}
 
-	d, err := yaml.Marshal(cfg)
-	if err != nil {
-		panic(err)
+	// merge in any existing properties from the config object
+	var wCfg *Config
+	if cfg != nil {
+		// if there's a config object, merge these two together
+		cfg.merge(iCfg)
+		wCfg = cfg
+	} else {
+		wCfg = iCfg
 	}
 
-	err = ioutil.WriteFile("l-p.yml", d, os.FileMode(0644))
+	cfgFile, _ := c.Flags().GetString("config")
+	err = wCfg.writeToFile(cfgFile)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Printf("Setup complete; saved config to %s", cfgFile)
 }
 
 // returns all the prompts needed for the `init` command
