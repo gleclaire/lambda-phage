@@ -80,6 +80,7 @@ func (p *prompt) withFunc(s func(string)) *prompt {
 // helps you build a config file
 func initPhage(c *cobra.Command, _ []string) {
 	l := liner.NewLiner()
+	defer l.Close()
 	l.SetCtrlCAborts(true)
 	fmt.Println(`
 		HELLO AND WELCOME
@@ -173,8 +174,6 @@ func initPhage(c *cobra.Command, _ []string) {
 		}
 	}
 
-	l.Close()
-
 	d, err := yaml.Marshal(cfg)
 	if err != nil {
 		panic(err)
@@ -211,7 +210,27 @@ func getPrompts(cfg *Config) []*prompt {
 			withString(&cfg.Runtime).
 			isRequired().
 			setText("What runtime are you using: nodejs, java8, or python 2.7?").
-			setDef("nodejs"),
+			setDef("nodejs").
+			withCompleter(
+			func(l string) []string {
+				// there can only be one
+				r := make([]string, 1)
+				if len(l) == 0 {
+					r[0] = ""
+				} else {
+					switch string(l[0]) {
+					case "n":
+						r[0] = "nodejs"
+					case "j":
+						r[0] = "java8"
+					case "p":
+						r[0] = "python2.7"
+					}
+				}
+
+				return r
+			},
+		),
 		newPrompt().
 			withString(&cfg.EntryPoint).
 			isRequired().
