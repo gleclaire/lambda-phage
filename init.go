@@ -3,6 +3,9 @@ package main
 import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/gopkg.in/yaml.v2"
 import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/spf13/cobra"
 import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/peterh/liner"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/aws/aws-sdk-go/service/iam"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/aws/aws-sdk-go/aws"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/tj/go-debug"
 import "strconv"
 import "strings"
 import "fmt"
@@ -27,10 +30,16 @@ type prompt struct {
 	stringSetStore *[]*string
 	intStore       **int64
 	funcStore      func(string)
+	completer      func(string) []string
 }
 
 func newPrompt() *prompt {
 	return new(prompt)
+}
+
+func (p *prompt) withCompleter(f liner.Completer) *prompt {
+	p.completer = f
+	return p
 }
 
 func (p *prompt) isRequired() *prompt {
@@ -71,7 +80,7 @@ func (p *prompt) withFunc(s func(string)) *prompt {
 // helps you build a config file
 func initPhage(c *cobra.Command, _ []string) {
 	l := liner.NewLiner()
-
+	l.SetCtrlCAborts(true)
 	fmt.Println(`
 		HELLO AND WELCOME
 
@@ -81,54 +90,19 @@ func initPhage(c *cobra.Command, _ []string) {
 
 	//reqMsg := "Sorry, that field is required. Try again."
 
+	// set this callback we can use to call all the stuff
+	var realCompleter liner.Completer
+	l.SetCompleter(func(line string) []string {
+		if realCompleter != nil {
+			return realCompleter(line)
+		}
+		return nil
+	})
+
 	cfg := new(Config)
 	cfg.IamRole = new(IamRole)
 	cfg.Location = new(Location)
-	wd, _ := os.Getwd()
-	st, _ := os.Stat(wd)
-
-	prompts := []*prompt{
-		newPrompt().
-			withString(&cfg.Name).
-			isRequired().
-			setText("Enter a project name").
-			setDef(st.Name()),
-		newPrompt().
-			withString(&cfg.Description).
-			setText("Enter a project description if you'd like").
-			setDef(""),
-		newPrompt().
-			withString(&cfg.Archive).
-			setText("Enter a archive name if you'd like").
-			setDef(st.Name() + ".zip"),
-		newPrompt().
-			withString(&cfg.Runtime).
-			isRequired().
-			setText("What runtime are you using: nodejs, java8, or python 2.7?").
-			setDef("nodejs"),
-		newPrompt().
-			withString(&cfg.EntryPoint).
-			isRequired().
-			setText("Enter an entry point or handler name").
-			setDef("index.handler"),
-		newPrompt().
-			withInt(&cfg.MemorySize).
-			setText("Enter memory size").
-			setDef("128"),
-		newPrompt().
-			withInt(&cfg.Timeout).
-			setText("Enter timeout").
-			setDef("5"),
-		newPrompt().
-			withStringSet(&cfg.Regions).
-			setText("Enter AWS regions where this function will run").
-			setDef("us-east-1"),
-		newPrompt().
-			withString(&cfg.IamRole.Name).
-			isRequired().
-			setText("Enter IAM role name").
-			setDef(""),
-	}
+	prompts := getPrompts(cfg)
 
 	for _, cPrompt := range prompts {
 		p := cPrompt
@@ -138,6 +112,12 @@ func initPhage(c *cobra.Command, _ []string) {
 		}
 
 		text += ": "
+
+		realCompleter = nil
+		if p.completer != nil {
+			realCompleter = p.completer
+		}
+
 		if s, err := l.Prompt(text); err == nil {
 			input := s
 			hasInput := input != ""
@@ -199,5 +179,115 @@ func initPhage(c *cobra.Command, _ []string) {
 	if err != nil {
 		panic(err)
 	}
-	ioutil.WriteFile("l-p.yml", d, os.FileMode(0644))
+
+	err = ioutil.WriteFile("l-p.yml", d, os.FileMode(0644))
+	if err != nil {
+		panic(err)
+	}
+}
+
+// returns all the prompts needed for the `init` command
+func getPrompts(cfg *Config) []*prompt {
+	wd, _ := os.Getwd()
+	st, _ := os.Stat(wd)
+
+	iamRoles, roleMap := getIamRoles()
+
+	return []*prompt{
+		newPrompt().
+			withString(&cfg.Name).
+			isRequired().
+			setText("Enter a project name").
+			setDef(st.Name()),
+		newPrompt().
+			withString(&cfg.Description).
+			setText("Enter a project description if you'd like").
+			setDef(""),
+		newPrompt().
+			withString(&cfg.Archive).
+			setText("Enter a archive name if you'd like").
+			setDef(st.Name() + ".zip"),
+		newPrompt().
+			withString(&cfg.Runtime).
+			isRequired().
+			setText("What runtime are you using: nodejs, java8, or python 2.7?").
+			setDef("nodejs"),
+		newPrompt().
+			withString(&cfg.EntryPoint).
+			isRequired().
+			setText("Enter an entry point or handler name").
+			setDef("index.handler"),
+		newPrompt().
+			withInt(&cfg.MemorySize).
+			setText("Enter memory size").
+			setDef("128"),
+		newPrompt().
+			withInt(&cfg.Timeout).
+			setText("Enter timeout").
+			setDef("5"),
+		newPrompt().
+			withStringSet(&cfg.Regions).
+			setText("Enter AWS regions where this function will run").
+			setDef("us-east-1"),
+		newPrompt().
+			withFunc(
+			func(s string) {
+				// if this looks like an ARN,
+				// we'll assume it is... for now
+				if strings.Index(s, "arn:aws:iam::") == 0 {
+					cfg.IamRole.Arn = &s
+				} else {
+					// check to see if this name is inside the role map
+					if arn, ok := roleMap[s]; ok {
+						cfg.IamRole.Arn = arn
+					} else {
+						// if not in role map, set the name
+						cfg.IamRole.Name = &s
+					}
+				}
+			},
+		).
+			isRequired().
+			setText("Enter IAM role name").
+			setDef("").
+			withCompleter(
+			func(l string) []string {
+				c := make([]string, 0)
+				for _, role := range iamRoles {
+					if strings.HasPrefix(*role.Name, l) {
+						c = append(c, *role.Name)
+					}
+				}
+
+				return c
+			},
+		),
+	}
+}
+
+// pulls all the IAM roles from your account
+func getIamRoles() ([]*IamRole, map[string]*string) {
+	debug := debug.Debug("core.getIamRoles")
+	i := iam.New(nil)
+	r, err := i.ListRoles(&iam.ListRolesInput{
+		// try loading up to 1000 roles now
+		MaxItems: aws.Int64(1000),
+	})
+
+	if err != nil {
+		debug("getting IAM roles failed! maybe you don't have permission to do that?")
+		return []*IamRole{}, map[string]*string{}
+	}
+
+	roles := make([]*IamRole, len(r.Roles))
+	roleMap := make(map[string]*string)
+	for i, r := range r.Roles {
+		roles[i] = &IamRole{
+			Arn:  r.Arn,
+			Name: r.RoleName,
+		}
+		roleMap[*r.RoleName] = r.Arn
+	}
+
+	return roles, roleMap
 }
