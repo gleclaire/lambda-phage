@@ -1,6 +1,7 @@
 package main
 
 import "fmt"
+import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/gopkg.in/yaml.v2"
 import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/aws/aws-sdk-go/service/iam"
 import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/aws/aws-sdk-go/aws"
 import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/tj/go-debug"
@@ -42,6 +43,7 @@ type Location struct {
 }
 
 type Config struct {
+	// stuff for YAML below:
 	Name         *string
 	Project      string
 	Arn          *string
@@ -62,6 +64,41 @@ type EventSource struct {
 	ApiName            *string `yaml:"apiName"`
 	ApiDeploymentStage *string `yaml:"apiDeploymentStage"`
 	ApiSecurity        *string `yaml:"apiSecurity"`
+}
+
+// writes this config to a YAML file
+func (c *Config) writeToFile(fName string) error {
+	d, err := yaml.Marshal(c)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(fName, d, os.FileMode(0644))
+	if err != nil {
+		return err
+	}
+
+}
+
+// copies properties from all the config objects into
+// the receiver config object
+func (c *Config) merge(others ...*Config) *Config {
+	for _, other := range others {
+		c.Name = other.Name
+		c.Project = other.Project
+		c.Arn = other.Arn
+		c.Description = other.Description
+		c.Archive = other.Archive
+		c.EntryPoint = other.EntryPoint
+		c.MemorySize = other.MemorySize
+		c.Runtime = other.Runtime
+		c.Timeout = other.Timeout
+		c.Regions = other.Regions
+		c.IamRole = other.IamRole
+		c.Location = other.Location
+		c.EventSources = other.EventSources
+	}
+	return c
 }
 
 // returns the arn for the role specified
