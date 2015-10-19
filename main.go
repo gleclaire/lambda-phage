@@ -48,6 +48,8 @@ func main() {
 			fmt.Println("Error reading config file: %s", err.Error())
 			return
 		}
+
+		cfg.fName = cf
 	}
 
 	root.Execute()
