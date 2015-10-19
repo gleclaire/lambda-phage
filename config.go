@@ -42,16 +42,26 @@ type Location struct {
 }
 
 type Config struct {
-	Name        *string
-	Description *string
-	Archive     *string
-	EntryPoint  *string `yaml:"entryPoint"`
-	MemorySize  *int64  `yaml:"memorySize"`
-	Runtime     *string
-	Timeout     *int64
-	Regions     []*string `yaml:"regions",flow`
-	IamRole     *IamRole  `yaml:"iamRole"`
-	Location    *Location
+	Name         *string
+	Project      string
+	Arn          *string
+	Description  *string
+	Archive      *string
+	EntryPoint   *string `yaml:"entryPoint"`
+	MemorySize   *int64  `yaml:"memorySize"`
+	Runtime      *string
+	Timeout      *int64
+	Regions      []*string `yaml:"regions"`
+	IamRole      *IamRole  `yaml:"iamRole"`
+	Location     *Location
+	EventSources []*EventSource `yaml:"eventSources"`
+}
+
+type EventSource struct {
+	Type               string
+	ApiName            *string `yaml:"apiName"`
+	ApiDeploymentStage *string `yaml:"apiDeploymentStage"`
+	ApiSecurity        *string `yaml:"apiSecurity"`
 }
 
 // returns the arn for the role specified
