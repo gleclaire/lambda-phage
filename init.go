@@ -90,6 +90,7 @@ func initPhage(c *cobra.Command, _ []string) {
 	prompts := []*prompt{
 		newPrompt().
 			withString(&cfg.Name).
+			isRequired().
 			setText("Enter a project name").
 			setDef(st.Name()),
 		newPrompt().
@@ -102,10 +103,12 @@ func initPhage(c *cobra.Command, _ []string) {
 			setDef(st.Name() + ".zip"),
 		newPrompt().
 			withString(&cfg.Runtime).
+			isRequired().
 			setText("What runtime are you using: nodejs, java8, or python 2.7?").
 			setDef("nodejs"),
 		newPrompt().
 			withString(&cfg.EntryPoint).
+			isRequired().
 			setText("Enter an entry point or handler name").
 			setDef("index.handler"),
 		newPrompt().
