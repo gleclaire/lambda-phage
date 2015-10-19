@@ -26,7 +26,7 @@ type prompt struct {
 	stringStore    **string
 	stringSetStore *[]*string
 	intStore       **int64
-	funcStore      func(interface{})
+	funcStore      func(string)
 }
 
 func newPrompt() *prompt {
@@ -63,7 +63,7 @@ func (p *prompt) withInt(s **int64) *prompt {
 	return p
 }
 
-func (p *prompt) withFunc(s func(interface{})) *prompt {
+func (p *prompt) withFunc(s func(string)) *prompt {
 	p.funcStore = s
 	return p
 }
@@ -180,6 +180,9 @@ func initPhage(c *cobra.Command, _ []string) {
 
 				i, _ := strconv.ParseInt(tParse, 10, 64)
 				*p.intStore = &i
+			} else if p.funcStore != nil {
+				// just call the function, man
+				p.funcStore(s)
 			}
 		} else if err == liner.ErrPromptAborted {
 			fmt.Println("Aborted")
