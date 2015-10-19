@@ -45,7 +45,7 @@ type Location struct {
 }
 
 type Config struct {
-	// stuff for YAML below:
+	fName        string
 	Name         *string
 	Project      string
 	Arn          *string
@@ -70,17 +70,7 @@ type EventSource struct {
 
 // writes this config to a YAML file
 func (c *Config) writeToFile(fName string) error {
-	d, err := yaml.Marshal(c)
-	if err != nil {
-		return err
-	}
-
-	err = ioutil.WriteFile(fName, d, os.FileMode(0644))
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return writeToYamlFile(c, fName)
 }
 
 // copies properties from all the config objects into
@@ -201,4 +191,16 @@ func getIamPolicy(name string) (*string, error) {
 	}
 
 	return r.Role.Arn, nil
+}
+
+func writeToYamlFile(data interface{}, fName string) error {
+	d, err := yaml.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(fName, d, os.FileMode(0644))
+	if err != nil {
+		return err
+	}
 }
