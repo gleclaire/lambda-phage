@@ -22,9 +22,50 @@ func init() {
 type prompt struct {
 	text           string
 	def            string
+	required       bool
 	stringStore    **string
 	stringSetStore *[]*string
 	intStore       **int64
+	funcStore      func(interface{})
+}
+
+func newPrompt() *prompt {
+	return new(prompt)
+}
+
+func (p *prompt) isRequired() *prompt {
+	p.required = true
+	return p
+}
+
+func (p *prompt) setDef(d string) *prompt {
+	p.def = d
+	return p
+}
+
+func (p *prompt) setText(t string) *prompt {
+	p.text = t
+	return p
+}
+
+func (p *prompt) withString(s **string) *prompt {
+	p.stringStore = s
+	return p
+}
+
+func (p *prompt) withStringSet(s *[]*string) *prompt {
+	p.stringSetStore = s
+	return p
+}
+
+func (p *prompt) withInt(s **int64) *prompt {
+	p.intStore = s
+	return p
+}
+
+func (p *prompt) withFunc(s func(interface{})) *prompt {
+	p.funcStore = s
+	return p
 }
 
 // helps you build a config file
@@ -46,72 +87,44 @@ func initPhage(c *cobra.Command, _ []string) {
 	wd, _ := os.Getwd()
 	st, _ := os.Stat(wd)
 
-	prompts := []prompt{
-		prompt{
-			"Enter a project name",
-			st.Name(),
-			&cfg.Name,
-			nil,
-			nil,
-		},
-		prompt{
-			"Enter a project description if you'd like",
-			"",
-			&cfg.Description,
-			nil,
-			nil,
-		},
-		prompt{
-			"Enter an archive name if you'd like",
-			st.Name() + ".zip",
-			&cfg.Archive,
-			nil,
-			nil,
-		},
-		prompt{
-			"What runtime are you using: nodejs, java8, or python 2.7?",
-			"nodejs",
-			&cfg.Runtime,
-			nil,
-			nil,
-		},
-
-		prompt{
-			"Enter an entry point or handler name",
-			"index.handler",
-			&cfg.EntryPoint,
-			nil,
-			nil,
-		},
-
-		prompt{
-			"Enter memory size",
-			"128",
-			nil,
-			nil,
-			&cfg.MemorySize,
-		},
-		prompt{
-			"Enter timeout",
-			"5",
-			nil,
-			nil,
-			&cfg.Timeout,
-		},
-		prompt{
-			"Enter AWS regions where this function will run",
-			"us-east-1",
-			nil,
-			&cfg.Regions,
-			nil,
-		},
-		prompt{
-			"Enter IAM role name",
-			"us-east-1",
-			&cfg.IamRole.Name,
-			nil,
-			nil,
-		},
+	prompts := []*prompt{
+		newPrompt().
+			withString(&cfg.Name).
+			setText("Enter a project name").
+			setDef(st.Name()),
+		newPrompt().
+			withString(&cfg.Description).
+			setText("Enter a project description if you'd like").
+			setDef(""),
+		newPrompt().
+			withString(&cfg.Archive).
+			setText("Enter a archive name if you'd like").
+			setDef(st.Name() + ".zip"),
+		newPrompt().
+			withString(&cfg.Runtime).
+			setText("What runtime are you using: nodejs, java8, or python 2.7?").
+			setDef("nodejs"),
+		newPrompt().
+			withString(&cfg.EntryPoint).
+			setText("Enter an entry point or handler name").
+			setDef("index.handler"),
+		newPrompt().
+			withInt(&cfg.MemorySize).
+			setText("Enter memory size").
+			setDef("128"),
+		newPrompt().
+			withInt(&cfg.Timeout).
+			setText("Enter timeout").
+			setDef("5"),
+		newPrompt().
+			withStringSet(&cfg.Regions).
+			setText("Enter AWS regions where this function will run").
+			setDef("us-east-1"),
+		newPrompt().
+			withString(&cfg.IamRole.Name).
+			isRequired().
+			setText("Enter IAM role name").
+			setDef(""),
 	}
 
 	for _, cPrompt := range prompts {
