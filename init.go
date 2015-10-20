@@ -22,6 +22,7 @@ func init() {
 
 type prompt struct {
 	text           string
+	description    string
 	def            string
 	required       bool
 	stringStore    **string
@@ -52,6 +53,11 @@ func (p *prompt) setDef(d string) *prompt {
 
 func (p *prompt) setText(t string) *prompt {
 	p.text = t
+	return p
+}
+
+func (p *prompt) setDescription(t string) *prompt {
+	p.description = t
 	return p
 }
 
@@ -120,6 +126,10 @@ func initPhage(c *cobra.Command, _ []string) {
 		realCompleter = nil
 		if p.completer != nil {
 			realCompleter = p.completer
+		}
+
+		if p.description != "" {
+			fmt.Print(p.description)
 		}
 
 		if s, err := l.Prompt(text); err == nil {
@@ -277,7 +287,12 @@ func getPrompts(cfg *Config) []*prompt {
 			},
 		).
 			isRequired().
-			setText("Enter IAM role name").
+			setText("IAM Role").
+			setDescription(
+			"\nAll Lambda functions must run with an IAM role, which gives them access\n" +
+				"to various resources in AWS. What role do you want to assign this function?\n" +
+				"Type a name and we'll try to auto-complete it if you press the tab key\n",
+		).
 			setDef("").
 			withCompleter(
 			func(l string) []string {
