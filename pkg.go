@@ -12,7 +12,7 @@ func init() {
 	pkgCmd := &cobra.Command{
 		Use:   "pkg",
 		Short: "adds all the current folder to a zip file recursively",
-		RunE:  pkg,
+		RunE:  pkgCommand,
 	}
 	flg := pkgCmd.Flags()
 
@@ -22,14 +22,25 @@ func init() {
 	cmds = append(cmds, pkgCmd)
 }
 
+func pkgCommand(c *cobra.Command, args []string) error {
+	p := &packager{
+		cfg,
+	}
+	return p.pkg(c, args)
+}
+
+type packager struct {
+	cfg *Config
+}
+
 // packages your package up into a zip file
-func pkg(c *cobra.Command, _ []string) error {
+func (p *packager) pkg(c *cobra.Command, _ []string) error {
 	var err error
 	debug := debug.Debug("cmd.pkg")
 
 	fmt.Println("Adding files to ZIP archive...")
 
-	binName := getArchiveName(c)
+	binName := getArchiveName(c, cfg)
 	zFile, err := newZipFile(binName)
 
 	if err != nil {
@@ -90,7 +101,7 @@ func pkg(c *cobra.Command, _ []string) error {
 
 // based on whatever has been passed in, this will determine the
 // filename for the archive
-func getArchiveName(c *cobra.Command) string {
+func getArchiveName(c *cobra.Command, cfg *Config) string {
 	var binName string
 
 	if cfg != nil {
