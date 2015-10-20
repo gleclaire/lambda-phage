@@ -29,10 +29,19 @@ func init() {
 		RunE:  addToProjectCmd,
 	})
 
+	deployPrjCmd := &cobra.Command{
+		Use:   "deploy [project1] [project2 ... projectN])",
+		Short: "deploys all the functions in the given project name",
+		RunE:  deployProjectCmd,
+	}
+	deployPrjCmd.Flags().String("filter", "", "pattern for filtering function names to deploy")
+
+	prjCmd.AddCommand(deployPrjCmd)
+
 	cmds = append(cmds, prjCmd)
 }
 
-// loads a project file or creates a new one
+// loads a project file or creates a new struct for one
 func getProject(pName string) (*Project, error) {
 	var err error
 	prjDir, err := createProjectDir()
@@ -56,6 +65,7 @@ func getProject(pName string) (*Project, error) {
 type Project struct {
 	// YAML filename for project
 	fName     string
+	fromFile  bool
 	Functions map[string]ProjectFunction
 }
 
@@ -140,6 +150,47 @@ func addToProjectCmd(c *cobra.Command, args []string) error {
 	return createProjectCmd(c, args)
 }
 
+// deploys an optionally-filtered set of lambda functions
+// for the project(s) you specify
+func deployProjectCmd(c *cobra.Command, args []string) error {
+	if len(args) == 0 {
+		fmt.Println("Need to have at least one project name to deploy :( Please type one.")
+		return nil
+	}
+
+	for _, prj := range args {
+		pCfg, err := getProject(prj)
+		if err != nil {
+			fmt.Printf("Error loading project %s:\n%s\n", prj, err)
+		} else if pCfg.fromFile == true {
+			for _, f := range pCfg.Functions {
+				cfg, err := loadConfig(f.Path)
+				if err != nil {
+					fmt.Printf(
+						"Error loading config for function %s in project %s:\n%s\n",
+						f.Config.Name,
+						prj,
+						err,
+					)
+				}
+
+				// if loading config succeeded, deploy this thing
+				d := deployer{cfg}
+				err = d.deploy(c, args)
+				if err != nil {
+					fmt.Printf(
+						"Deploy failed for function %s in project %s:\n%s\n",
+						f.Config.Name,
+						prj,
+						err,
+					)
+				}
+			}
+		}
+	}
+	return nil
+}
+
 // parses or creates a project config file
 func openProject(fName string) (*Project, error) {
 	debug := debug.Debug("core.openProject")
@@ -159,6 +210,7 @@ func openProject(fName string) (*Project, error) {
 		if err != nil {
 			return nil, fmt.Errorf("Error parsing project file %s:\n %s\n", fName, err)
 		}
+		pCfg.fromFile = true
 	} else {
 		debug("no project found, making empty struct")
 		pCfg = new(Project)
