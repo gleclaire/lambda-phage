@@ -67,6 +67,25 @@ type EventSource struct {
 	ApiSecurity        *string `yaml:"apiSecurity"`
 }
 
+// loads configuration from a file, provided in fName
+func loadConfig(fName string) (*Config, error) {
+	var cfg *Config
+	f, err := ioutil.ReadFile(fName)
+	if err != nil {
+		return nil, fmt.Errorf("Error reading config file: %s", err.Error())
+	}
+
+	err = yaml.Unmarshal(f, &cfg)
+
+	if err != nil {
+		return nil, fmt.Errorf("Error reading config file: %s", err.Error())
+	}
+
+	cfg.fName = fName
+
+	return cfg, nil
+}
+
 // writes this config to a YAML file
 func (c *Config) writeToFile(fName string) error {
 	return writeToYamlFile(c, fName)
