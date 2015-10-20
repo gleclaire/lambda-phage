@@ -102,7 +102,7 @@ func createProjectCmd(c *cobra.Command, args []string) error {
 	pCfg, err := getProject(pName)
 
 	if err != nil {
-		fmt.Printf("Error creating project:\n%s\n", err)
+		fmt.Printf("Error creating or opening project:\n%s\n", err)
 		return nil
 	}
 
@@ -115,14 +115,29 @@ func createProjectCmd(c *cobra.Command, args []string) error {
 		return nil
 	}
 
-	fmt.Printf("Created project %s\n", pName)
+	var action string
+
+	switch c.Name() {
+	case "add":
+		action = fmt.Sprintf("added %s to", *cfg.Name)
+	default:
+		action = "created"
+	}
+
+	fmt.Printf("%s project %s\n", action, pName)
 
 	return nil
 }
 
 // adds the current config file to the project
+// uses createProjectCmd now, but will be separate from that
+// so we reserve the right to change it whenever
 func addToProjectCmd(c *cobra.Command, args []string) error {
-	return nil
+	if cfg == nil || (cfg != nil && cfg.Name == nil) {
+		return fmt.Errorf("No project configuration found! Please run `lambda-phage init` first!")
+	}
+	// just use create project for now
+	return createProjectCmd(c, args)
 }
 
 // parses or creates a project config file
