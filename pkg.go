@@ -27,6 +27,8 @@ func pkg(c *cobra.Command, _ []string) error {
 	var err error
 	debug := debug.Debug("cmd.pkg")
 
+	fmt.Println("Adding files to ZIP archive...")
+
 	binName := getArchiveName(c)
 	zFile, err := newZipFile(binName)
 
