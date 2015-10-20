@@ -51,6 +51,13 @@ $ lambda-phage project deploy --filter '.*frontend' my-project-name
 $ lambda-phage project deploy --dry-run my-project-name
 ```
 
+## TODO:
+- real tests (tdd be damned i guess?)
+- add `project import` command to interactively load suggested project names based on whatever's in config YAML
+- add support for configuring event sources through `init`
+  - potential blocker is lack of API gateway API client, though we might be able to do it anyway
+  - can at least support streams (dynamoDB + kinesis), s3, cloudwatch event sources
+
 ## Usage
 
 ```
