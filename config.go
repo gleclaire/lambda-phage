@@ -8,6 +8,7 @@ import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/tj/go
 import "strings"
 import "io/ioutil"
 import "os"
+import "path/filepath"
 
 /*
 
@@ -82,7 +83,13 @@ func loadConfig(fName string) (*Config, error) {
 		return nil, fmt.Errorf("Error reading config file: %s", err.Error())
 	}
 
-	cfg.fName = fName
+	wd, _ := os.Getwd()
+	if filepath.IsAbs(fName) {
+		cfg.fName = fName
+	} else {
+		// if the path is not absolute, we need to make it absolute
+		cfg.fName = wd + string(filepath.Separator) + fName
+	}
 
 	return cfg, nil
 }
