@@ -203,4 +203,6 @@ func writeToYamlFile(data interface{}, fName string) error {
 	if err != nil {
 		return err
 	}
+
+	return nil
 }
