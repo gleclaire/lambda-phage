@@ -96,7 +96,7 @@ func initPhage(c *cobra.Command, _ []string) {
   This command will help you set up your code for deployment to Lambda!
   
   But we need some information from you, like what you want to name
-  your function and so on.
+  your function and a few other things!
   
   Please answer the prompts as they appear below:
 	`)
