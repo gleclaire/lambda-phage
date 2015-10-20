@@ -82,15 +82,6 @@ func initPhage(c *cobra.Command, _ []string) {
 	defer l.Close()
 	l.SetCtrlCAborts(true)
 	fmt.Println(`
-     ,-^-.
-     |\/\|
-     '-V-'
-       H
-       H
-  itz  H
-    .-;":-.
-   ,'|  '; \
-  
   HELLO AND WELCOME
   
   This command will help you set up your code for deployment to Lambda!

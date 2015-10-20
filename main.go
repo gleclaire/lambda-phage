@@ -10,6 +10,17 @@ import "fmt"
 var cmds = []*cobra.Command{}
 var cfg *Config
 
+var lambdaphage = `
+     ,-^-.
+     |\/\|
+     '-V-'
+       H
+       H
+  itz  H
+    .-;":-.
+   ,'|  '; \
+`
+
 func main() {
 	defaultCfgName := "l-p.yml"
 	debug := debug.Debug("main")
@@ -52,5 +63,6 @@ func main() {
 		cfg.fName = cf
 	}
 
+	fmt.Println(lambdaphage)
 	root.Execute()
 }
