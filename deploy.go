@@ -27,9 +27,6 @@ func init() {
 		RunE:  deploy,
 	}
 
-	flg := dCmd.Flags()
-
-	flg.BoolP("verbose", "v", false, "verbosity")
 	cmds = append(cmds, dCmd)
 }
 
@@ -57,6 +54,7 @@ func deploy(c *cobra.Command, args []string) error {
 	bucket, key := cfg.getS3Info(binName)
 
 	if bucket == nil || key == nil {
+		fmt.Println("Uploading function to Lambda")
 		// if we couldn't get bucket or
 		// key info, let's upload the data
 		// ...soon
@@ -67,6 +65,7 @@ func deploy(c *cobra.Command, args []string) error {
 
 		code.ZipFile = b
 	} else {
+		fmt.Println("Uploading function to s3")
 		code.S3Bucket = bucket
 		code.S3Key = key
 		err = uploadS3(binName, bucket, key)
@@ -77,7 +76,8 @@ func deploy(c *cobra.Command, args []string) error {
 
 	debug("preparing for lambda API")
 	for _, region := range cfg.Regions {
-		debug("using lambda API for region %s", *region)
+		fmt.Printf("Deploying lambda function for %s\n", *region)
+
 		l := lambda.New(
 			aws.NewConfig().
 				WithRegion(*region),
@@ -101,7 +101,7 @@ func deploy(c *cobra.Command, args []string) error {
 			if awe, ok := err.(awserr.Error); ok {
 				if awe.Code() == "ResourceConflictException" {
 					debug("function already exists, calling update")
-					return updateLambda(l, code, iamRole)
+					err = updateLambda(l, code, iamRole)
 				} else {
 					return err
 				}
@@ -114,6 +114,12 @@ func deploy(c *cobra.Command, args []string) error {
 			// info, etc
 			debug("function creation succeeded! ...we think")
 		}
+
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("Function %s deployed to region %s!\n", *cfg.Name, *region)
 	}
 
 	return nil
