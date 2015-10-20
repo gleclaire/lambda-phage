@@ -8,6 +8,7 @@ import "os"
 import "os/user"
 import "fmt"
 import "crypto/sha1"
+import "regexp"
 
 func init() {
 	prjCmd := &cobra.Command{
@@ -35,6 +36,7 @@ func init() {
 		RunE:  deployProjectCmd,
 	}
 	deployPrjCmd.Flags().String("filter", "", "pattern for filtering function names to deploy")
+	deployPrjCmd.Flags().Bool("dry-run", false, "print what functions we would deploy rather than actually doing it")
 
 	prjCmd.AddCommand(deployPrjCmd)
 
@@ -162,9 +164,18 @@ func addToProjectCmd(c *cobra.Command, args []string) error {
 // deploys an optionally-filtered set of lambda functions
 // for the project(s) you specify
 func deployProjectCmd(c *cobra.Command, args []string) error {
+	debug := debug.Debug("cmd.deployProjectCmd")
 	if len(args) == 0 {
 		fmt.Println("Need to have at least one project name to deploy :( Please type one.")
 		return nil
+	}
+
+	isDryRun, _ := c.Flags().GetBool("dry-run")
+	filter, _ := c.Flags().GetString("filter")
+	reg, err := regexp.Compile(filter)
+
+	if err != nil {
+		return fmt.Errorf("Invalid filter, %s\n", err)
 	}
 
 	for _, prj := range args {
@@ -181,6 +192,22 @@ func deployProjectCmd(c *cobra.Command, args []string) error {
 						prj,
 						err,
 					)
+					continue
+				}
+
+				if reg != nil && !reg.MatchString(*cfg.Name) {
+					// skip current project if it doesn't match regex
+					continue
+				}
+
+				if isDryRun {
+					fmt.Printf(
+						"Would deploy function %s in project %s:\n%s\n",
+						*cfg.Name,
+						prj,
+						err,
+					)
+					continue
 				}
 
 				// if loading config succeeded, deploy this thing
@@ -195,6 +222,8 @@ func deployProjectCmd(c *cobra.Command, args []string) error {
 					)
 				}
 			}
+		} else {
+			debug("skipped project %s because it wasn't found", prj)
 		}
 	}
 	return nil
