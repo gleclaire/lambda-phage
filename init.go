@@ -306,6 +306,18 @@ func getPrompts(cfg *Config) []*prompt {
 				return c
 			},
 		),
+		newPrompt().
+			withStringSet(&cfg.Location.S3Bucket).
+			setText("s3 bucket you want to upload your code to (if any)").
+			setDef(""),
+		newPrompt().
+			withStringSet(&cfg.Location.S3Key).
+			setText("s3 folder your code should be stored inside (if any)").
+			setDef(""),
+		newPrompt().
+			withStringSet(&cfg.Location.S3Region).
+			setText("s3 region where your bucket is (if any)").
+			setDef(""),
 	}
 }
 
