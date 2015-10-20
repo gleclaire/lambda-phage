@@ -47,7 +47,6 @@ type Location struct {
 type Config struct {
 	fName        string
 	Name         *string
-	Project      string
 	Arn          *string
 	Description  *string
 	Archive      *string
@@ -78,7 +77,6 @@ func (c *Config) writeToFile(fName string) error {
 func (c *Config) merge(others ...*Config) *Config {
 	for _, other := range others {
 		c.Name = other.Name
-		c.Project = other.Project
 		c.Arn = other.Arn
 		c.Description = other.Description
 		c.Archive = other.Archive
