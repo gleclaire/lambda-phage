@@ -6,6 +6,7 @@ import "io/ioutil"
 import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/tj/go-debug"
 import "os"
 import "fmt"
+import "path/filepath"
 
 var cmds = []*cobra.Command{}
 var cfg *Config
@@ -36,6 +37,8 @@ func main() {
 	cf, _ := root.Flags().GetString("config")
 	cfgExists := false
 
+	wd, _ := os.Getwd()
+
 	if _, err := os.Stat(cf); err != nil &&
 		(!os.IsNotExist(err) || cf != defaultCfgName) {
 		fmt.Println("Error reading config file: %s", err.Error())
@@ -60,7 +63,13 @@ func main() {
 			return
 		}
 
-		cfg.fName = cf
+		if filepath.IsAbs(cf) {
+			cfg.fName = cf
+		} else {
+			// if the path is not absolute, we need to make it absolute
+			cfg.fName = wd + string(filepath.Separator) + cf
+		}
+
 	}
 
 	fmt.Println(lambdaphage)
