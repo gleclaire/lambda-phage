@@ -35,7 +35,7 @@ func init() {
 		Short: "deploys all the functions in the given project name",
 		RunE:  deployProjectCmd,
 	}
-	deployPrjCmd.Flags().String("filter", "", "pattern for filtering function names to deploy")
+	deployPrjCmd.Flags().String("filter", "", "pattern for filtering function names to deploy; only does regex!!")
 	deployPrjCmd.Flags().Bool("dry-run", false, "print what functions we would deploy rather than actually doing it")
 
 	prjCmd.AddCommand(deployPrjCmd)
@@ -202,10 +202,9 @@ func deployProjectCmd(c *cobra.Command, args []string) error {
 
 				if isDryRun {
 					fmt.Printf(
-						"Would deploy function %s in project %s:\n%s\n",
+						"Would deploy function %s in project %s\n",
 						*cfg.Name,
 						prj,
-						err,
 					)
 					continue
 				}
