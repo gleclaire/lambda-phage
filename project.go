@@ -13,7 +13,6 @@ func init() {
 	prjCmd := &cobra.Command{
 		Use:   "project [command]",
 		Short: "does project stuff",
-		//RunE:  ,
 	}
 
 	//flg := prjCmd.Flags()
@@ -21,10 +20,36 @@ func init() {
 	prjCmd.AddCommand(&cobra.Command{
 		Use:   "create [name]",
 		Short: "creates a new project with the specified name & adds the current folder to it",
-		RunE:  createProject,
+		RunE:  createProjectCmd,
+	})
+
+	prjCmd.AddCommand(&cobra.Command{
+		Use:   "add [project]",
+		Short: "adds the current folder to a project",
+		RunE:  addToProjectCmd,
 	})
 
 	cmds = append(cmds, prjCmd)
+}
+
+// loads a project file or creates a new one
+func getProject(pName string) (*Project, error) {
+	var err error
+	prjDir, err := createProjectDir()
+	if err != nil {
+		return nil, err
+	}
+
+	pFilePath := fmt.Sprintf("%s/%s.yml", prjDir, pName)
+
+	pCfg, err := openProject(pFilePath)
+
+	if err != nil {
+		return nil, fmt.Errorf("Error getting project file:\n%s\n", err)
+	}
+
+	pCfg.fName = pFilePath
+	return pCfg, nil
 }
 
 // defines the configuration for a project
@@ -68,28 +93,8 @@ func (p *Project) addFunction(c *Config) *Project {
 	return p
 }
 
-// loads a project file or creates a new one
-func getProject(pName string) (*Project, error) {
-	var err error
-	prjDir, err := createProjectDir()
-	if err != nil {
-		return nil, err
-	}
-
-	pFilePath := fmt.Sprintf("%s/%s.yml", prjDir, pName)
-
-	pCfg, err := openProject(pFilePath)
-
-	if err != nil {
-		return nil, fmt.Errorf("Error getting project file:\n%s\n", err)
-	}
-
-	pCfg.fName = pFilePath
-	return pCfg, nil
-}
-
-func createProject(c *cobra.Command, args []string) error {
-
+// cobra command for creating project
+func createProjectCmd(c *cobra.Command, args []string) error {
 	if len(args) == 0 || args[0] == "" {
 		return fmt.Errorf("You didn't give us a project name! Please give us one.")
 	}
@@ -112,6 +117,11 @@ func createProject(c *cobra.Command, args []string) error {
 
 	fmt.Printf("Created project %s\n", pName)
 
+	return nil
+}
+
+// adds the current config file to the project
+func addToProjectCmd(c *cobra.Command, args []string) error {
 	return nil
 }
 
