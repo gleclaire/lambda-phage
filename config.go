@@ -183,7 +183,7 @@ func (c *Config) getS3Info(fName string) (bucket, key *string) {
 		return nil, nil
 	}
 
-	if loc.S3Bucket == nil {
+	if loc.S3Bucket == nil || *loc.S3Bucket == "" {
 		// TODO: make these return an error instead??
 		debug("upload location info found, but s3 bucket missing")
 		return nil, nil
