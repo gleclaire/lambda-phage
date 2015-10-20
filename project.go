@@ -117,9 +117,18 @@ func createProjectCmd(c *cobra.Command, args []string) error {
 	}
 
 	// add the current function to the project
-	pCfg.addFunction(cfg)
-	err = pCfg.writeToFile()
+	if cfg != nil {
+		pCfg.addFunction(cfg)
+		cfg.addProject(pName)
+		err = cfg.writeToFile(cfg.fName)
 
+		if err != nil {
+			fmt.Printf("Error updating config with project:\n%s\n", err)
+			return nil
+		}
+	}
+
+	err = pCfg.writeToFile()
 	if err != nil {
 		fmt.Printf("Error saving project:\n%s\n", err)
 		return nil
