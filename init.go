@@ -82,10 +82,23 @@ func initPhage(c *cobra.Command, _ []string) {
 	defer l.Close()
 	l.SetCtrlCAborts(true)
 	fmt.Println(`
-		HELLO AND WELCOME
-
-		This command will help you set up your code for deployment to lambda!
-		Please answer the prompts as they appear below:
+     ,-^-.
+     |\/\|
+     '-V-'
+       H
+       H
+  itz  H
+    .-;":-.
+   ,'|  '; \
+  
+  HELLO AND WELCOME
+  
+  This command will help you set up your code for deployment to Lambda!
+  
+  But we need some information from you, like what you want to name
+  your function and so on.
+  
+  Please answer the prompts as they appear below:
 	`)
 
 	//reqMsg := "Sorry, that field is required. Try again."
