@@ -23,6 +23,8 @@ Once you've set configuration, all you need to do is run the `deploy` command to
 $ lambda-phage deploy
 ```
 
+lambda-phage uses Amazon's official Go SDK, so you can provide it API credentials in any way that the Go SDK supports, including a local credential file and environment variables. If you're getting set up for the first time, please read [Amazon's guide to setting up their own AWS CLI tools](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files), which describes how to set up a local credential file.
+
 ## Project Support
 
 lambda-phage can organize your lambda functions into projects for easier deployment. To create a project, use the `project create` command:
