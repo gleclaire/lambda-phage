@@ -117,3 +117,8 @@ location:
   s3region: us-east-1
   s3ObjectVersion: myversion
 ```
+
+## Credits?
+
+The bacteriophage ASCII art might come from someone with the handle 'itz'! Not sure! I removed their signature from the text and credit them here. If you're itz, please get in touch; you made some cool-looking virus ASCII.
+
