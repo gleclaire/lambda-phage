@@ -17,7 +17,7 @@ var lambdaphage = `
      '-V-'
        H
        H
-  itz  H
+       H
     .-;":-.
    ,'|  '; \
 `

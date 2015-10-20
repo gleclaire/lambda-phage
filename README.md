@@ -71,7 +71,7 @@ $ lambda-phage project deploy --dry-run my-project-name
      '-V-'
        H
        H
-  itz  H
+       H
     .-;":-.
    ,'|  '; \
 
