@@ -14,34 +14,58 @@ import "bytes"
 //import "github.com/aws/aws-sdk-go/aws"
 import "github.com/hopkinsth/lambda-phage/Godeps/_workspace/src/github.com/spf13/cobra"
 
-type wtflog struct{}
-
-func (w wtflog) Log(s ...interface{}) {
-	fmt.Println(s...)
-}
-
 func init() {
 	dCmd := &cobra.Command{
 		Use:   "deploy",
 		Short: "deploys your lambda function according to your config file or options provided",
-		RunE:  deploy,
+		RunE:  deployCmd,
 	}
+
+	dCmd.Flags().Bool("skip-archive", false, "skip creating an archive (the `pkg` command)")
 
 	cmds = append(cmds, dCmd)
 }
 
-func deploy(c *cobra.Command, args []string) error {
+func deployCmd(c *cobra.Command, args []string) error {
+	d := &deployer{
+		cfg,
+	}
+
+	return d.deploy(c, args)
+}
+
+type deployer struct {
+	cfg *Config
+}
+
+func (d *deployer) deploy(c *cobra.Command, args []string) error {
 	debug := debug.Debug("cmd.deploy")
 	// must package first, so:
 	var err error
-	err = pkg(c, args)
 
-	if err != nil {
-		return err
+	if d.cfg == nil {
+		return fmt.Errorf(
+			`No configuration file found, and you must have one to deploy!
+Try running lambda-phage init before deploying.
+`)
+	}
+
+	fmt.Printf("Beginning deploy of lambda function %s\n", *d.cfg.Name)
+
+	skipPkg, _ := c.Flags().GetBool("skip-archive")
+	if !skipPkg {
+		pkgEr := packager{
+			cfg,
+		}
+		err = pkgEr.pkg(c, args)
+
+		if err != nil {
+			return err
+		}
 	}
 
 	// should have written data to this file
-	binName := getArchiveName(c)
+	binName := getArchiveName(c, d.cfg)
 
 	var iamRole *string
 	iamRole, err = cfg.getRoleArn()
@@ -54,7 +78,7 @@ func deploy(c *cobra.Command, args []string) error {
 	bucket, key := cfg.getS3Info(binName)
 
 	if bucket == nil || key == nil {
-		fmt.Println("Uploading function to Lambda")
+		fmt.Printf("Will upload archive %s to Lambda\n", binName)
 		// if we couldn't get bucket or
 		// key info, let's upload the data
 		// ...soon
@@ -65,10 +89,10 @@ func deploy(c *cobra.Command, args []string) error {
 
 		code.ZipFile = b
 	} else {
-		fmt.Println("Uploading function to s3")
+		fmt.Printf("Will upload archive %s to s3\n", binName)
 		code.S3Bucket = bucket
 		code.S3Key = key
-		err = uploadS3(binName, bucket, key)
+		err = d.uploadS3(binName, bucket, key)
 		if err != nil {
 			return err
 		}
@@ -101,7 +125,7 @@ func deploy(c *cobra.Command, args []string) error {
 			if awe, ok := err.(awserr.Error); ok {
 				if awe.Code() == "ResourceConflictException" {
 					debug("function already exists, calling update")
-					err = updateLambda(l, code, iamRole)
+					err = d.updateLambda(l, code, iamRole)
 				} else {
 					return err
 				}
@@ -126,11 +150,12 @@ func deploy(c *cobra.Command, args []string) error {
 }
 
 // updates function code, settings in AWS lambda
-func updateLambda(
+func (d *deployer) updateLambda(
 	l *lambda.Lambda,
 	code *lambda.FunctionCode,
 	iamRole *string,
 ) error {
+	cfg := d.cfg
 	_, err := l.UpdateFunctionConfiguration(
 		&lambda.UpdateFunctionConfigurationInput{
 			FunctionName: cfg.Name,
@@ -164,7 +189,8 @@ func updateLambda(
 
 // should probably handle this in memory,
 // but this fn will upload your file to s3
-func uploadS3(fName string, bucket, key *string) error {
+func (d *deployer) uploadS3(fName string, bucket, key *string) error {
+	cfg := d.cfg
 	debug := debug.Debug("uploadS3")
 	awscfg := aws.NewConfig().WithRegion(*cfg.Location.S3Region)
 	s := s3.New(awscfg)
