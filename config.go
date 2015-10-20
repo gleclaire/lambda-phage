@@ -48,6 +48,7 @@ type Config struct {
 	fName        string
 	Name         *string
 	Arn          *string
+	Projects     []string
 	Description  *string
 	Archive      *string
 	EntryPoint   *string `yaml:"entryPoint"`
@@ -108,6 +109,30 @@ func (c *Config) merge(others ...*Config) *Config {
 		c.Location = other.Location
 		c.EventSources = other.EventSources
 	}
+	return c
+}
+
+// adds a project name to the config file
+// this is purely for informational purposes
+// and sharing common project names
+func (c *Config) addProject(prj string) *Config {
+	if c.Projects == nil {
+		c.Projects = make([]string, 0)
+	}
+
+	hasPrj := false
+
+	for _, name := range c.Projects {
+		if name == prj {
+			hasPrj = true
+			break
+		}
+	}
+
+	if !hasPrj {
+		c.Projects = append(c.Projects, prj)
+	}
+
 	return c
 }
 
