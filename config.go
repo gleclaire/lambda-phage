@@ -59,10 +59,10 @@ type Config struct {
 	Regions      []*string `yaml:"regions"`
 	IamRole      *IamRole  `yaml:"iamRole"`
 	Location     *Location
-	EventSources []*EventSource `yaml:"eventSources"`
+	EventSources []*EventSourceConfig `yaml:"eventSources"`
 }
 
-type EventSource struct {
+type EventSourceConfig struct {
 	Type               string
 	ApiName            *string `yaml:"apiName"`
 	ApiDeploymentStage *string `yaml:"apiDeploymentStage"`
